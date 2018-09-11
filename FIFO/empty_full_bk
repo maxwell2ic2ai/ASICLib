@@ -1,0 +1,51 @@
+// Grey code pointer
+always @(posedge rclk or posedge rrst) begin
+    if (rrst) begin
+        rptr <= 1'b0;
+        raddrmsb <= 1'b0;
+    end
+    else begin
+        rptr <= rgnext;
+        raddrmsb <= rgnext[ADDRSIZE]^rgnext[ADDRSIZE-1];
+    end
+end
+
+always @(*) begin: Grey_inc
+    integer i;
+    for (i=0; i<=ADDRSIZE; i=i+1)
+        rbin[i] = ^(rptr>>i);
+    if (!rempty) rbnext = rbin + rinc;
+    else rbnext = rbin;
+    rgnext = (rbnext>>1)^rbnext;
+end
+
+// Memory read-address pointer
+assign raddr = {raddrmsb, rptr[ADDRSIZE-2:0]};
+
+
+
+wire             w_2ndmsb, wr_2ndmsb;
+
+// Grey code pointer
+always @(posedge wclk or posedge wrst) begin
+    if (wrst) begin
+        wptr <= 1'b0;
+        waddrmsb <= 1'b0;
+    end
+    else begin
+        wptr <= wgnext;
+        waddrmsb <= wgnext[ADDRSIZE]^wgnext[ADDRSIZE-1];
+    end
+end
+
+always @(*) begin: Grey_inc
+    integer i;
+    for (i=0; i<=ADDRSIZE; i=i+1)
+        wbin[i] = ^(wptr>>i);
+    if (!wfull) wbnext = wbin + winc;
+    else wbnext = wbin;
+    wgnext = (wbnext>>1)^wbnext;
+end
+
+// Memory read-address pointer
+assign waddr = {waddrmsb, wptr[ADDRSIZE-2:0]};

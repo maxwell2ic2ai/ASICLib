@@ -89,3 +89,36 @@ module top_module (
     bcdcount counter2 (clk, reset, c_enable[2], Q2);
     assign OneHertz = (Q2==4'b1001) ? 1 : 0;
 endmodule
+
+module top_module (
+    input clk,
+    input reset,   // Synchronous active-high reset
+    output [3:1] ena,
+    output [15:0] q);
+    decade U1(clk, reset, 1'b1, q[3:0]);
+    decade U2(clk, reset, ena[1], q[7:4]);
+    decade U3(clk, reset, ena[2], q[11:8]);
+    decade U4(clk, reset, ena[3], q[15:12]);
+    assign ena[1] = (q[3:0] == 4'h9);
+    assign ena[2] = (q[7:0] == 8'h99);
+    assign ena[3] = (q[11:0] == 12'h999);
+endmodule
+module decade(
+    input clk,
+    input reset,
+    input add,
+    output reg [3:0] q
+    );
+    always @(posedge clk) begin
+        if (reset) begin
+            q <= 4'd0;
+        end
+        else if (add) begin
+            if (q[3:0] == 4'h9)
+                q <= 4'h0;
+            else
+                q <= q+1;
+        end
+    end
+endmodule
+
